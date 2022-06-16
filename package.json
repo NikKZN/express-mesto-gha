@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/NikKZN/express-mesto-gha#readme",
   "dependencies": {
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "mongoose": "^6.3.8"
   }
 }
