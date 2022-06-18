@@ -1,4 +1,3 @@
-// const { Error } = require('mongoose');
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
@@ -32,7 +31,11 @@ module.exports.deleteCard = (req, res) => {
       return res.status(200).send({ data: card });
     })
     .catch((err) => {
-      res.send({ message: `Неизвестная ошибка: ${err}` });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+        return;
+      }
+      res.status(500).send({ message: `Ошибка по-умолчанию: ${err}` });
     });
 };
 
