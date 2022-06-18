@@ -16,11 +16,20 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  req.card = {
+    _id: '62ad4606c3aec5fa39715848',
+  };
+
+  next();
+});
+
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', usersRoutes);
 app.use('/', cardsRoutes);
