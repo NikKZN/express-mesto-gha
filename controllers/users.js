@@ -3,7 +3,7 @@ const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../utils/con
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
     });
@@ -12,7 +12,7 @@ module.exports.getUsers = (req, res) => {
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(ERROR_CODE_400).send({ message: `${err.name}: Переданы некорректные данные` });
@@ -27,7 +27,7 @@ module.exports.getUserId = (req, res) => {
       if (!user) {
         return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
       }
-      return res.status(200).send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -44,7 +44,7 @@ module.exports.updateProfile = (req, res) => {
       if (!user) {
         return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
       }
-      return res.status(200).send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -61,7 +61,7 @@ module.exports.updateAvatar = (req, res) => {
       if (!user) {
         return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
       }
-      return res.status(200).send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {

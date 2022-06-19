@@ -3,7 +3,7 @@ const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../utils/con
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
       res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
     });
@@ -13,7 +13,7 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         res.status(ERROR_CODE_400).send({ message: 'Переданы некорректные данные' });
@@ -29,7 +29,7 @@ module.exports.deleteCard = (req, res) => {
       if (!card) {
         return res.status(ERROR_CODE_404).send({ message: 'Карточка не найдена' });
       }
-      return res.status(200).send({ data: card });
+      return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -49,7 +49,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
     if (!card) {
       return res.status(ERROR_CODE_404).send({ message: 'Карточка не найдена' });
     }
-    return res.status(200).send({ data: card });
+    return res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -67,7 +67,7 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     if (!card) {
       return res.status(ERROR_CODE_404).send({ message: 'Карточка не найдена' });
     }
-    return res.status(200).send({ data: card });
+    return res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
