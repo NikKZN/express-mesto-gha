@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../utils/constants');
 
@@ -80,5 +81,24 @@ module.exports.updateAvatar = (req, res) => {
         return res.status(ERROR_CODE_400).send({ message: `Переданы некорректные данные: ${err.name}` });
       }
       return res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
     });
 };
