@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { login, createUser } = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
@@ -33,6 +34,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/signin', login);
 app.post('/signup', createUser);
+
+app.use(auth);
+
 app.use('/', cardsRoutes);
 app.use('/', (req, res) => {
   res.status(404).send({ message: 'Страница не найдена!' });
