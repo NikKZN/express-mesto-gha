@@ -10,6 +10,22 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
+module.exports.getUserMe = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user._id) {
+        return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(ERROR_CODE_400).send({ message: `${err.name}: Переданы некорректные данные` });
+      }
+      return next(err);
+    });
+};
+
 module.exports.createUser = (req, res) => {
   const {
     name,
