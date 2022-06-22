@@ -9,22 +9,6 @@ const { PORT = 3000 } = process.env;
 
 const app = express();
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62ac4bb57fe06120c127d28c',
-  };
-
-  next();
-});
-
-app.use((req, res, next) => {
-  req.card = {
-    _id: '62ad4606c3aec5fa39715848',
-  };
-
-  next();
-});
-
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
