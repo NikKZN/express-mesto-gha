@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const { login, createUser } = require('./controllers/users');
 const cardsRoutes = require('./routes/cards');
 const auth = require('./middlewares/auth');
+const errHandler = require('./middlewares/errHandler');
 
 const { PORT = 3000 } = process.env;
 
@@ -25,5 +26,7 @@ app.use('/', cardsRoutes);
 app.use('/', (req, res) => {
   res.status(404).send({ message: 'Страница не найдена!' });
 });
+
+app.use(errHandler);
 
 app.listen(PORT);

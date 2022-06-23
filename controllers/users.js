@@ -2,12 +2,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../utils/constants');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.getUserMe = (req, res, next) => {
