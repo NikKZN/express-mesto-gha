@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { login, createUser } = require('./routes/users');
+const { login, createUser } = require('./controllers/users');
 const cardsRoutes = require('./routes/cards');
 const auth = require('./middlewares/auth');
 
