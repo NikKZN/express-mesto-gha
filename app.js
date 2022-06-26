@@ -31,6 +31,4 @@ app.use('/', (req, res) => {
 
 app.use(errHandler);
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT);
