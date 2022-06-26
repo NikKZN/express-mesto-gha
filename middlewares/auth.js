@@ -1,26 +1,25 @@
 const jwt = require('jsonwebtoken');
+const Error401 = require('../errors/error401');
+
+const SECRET_KEY = 'some-secret-key';
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    Error401('Требуется авторизация');
   }
 
   const token = authorization.replace('Bearer ', '');
   let payload;
 
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, SECRET_KEY);
   } catch (err) {
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    Error401('Передан неверный логин или пароль');
   }
 
   req.user = payload;
 
-  return next();
+  next();
 };

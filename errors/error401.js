@@ -1,9 +1,9 @@
-class Error401 extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = 401;
-    this.errorMessage = message;
-  }
-}
+const Error401 = (message) => {
+  const error = new Error(message);
+
+  error.statusCode = 401;
+
+  throw error;
+};
 
 module.exports = Error401;

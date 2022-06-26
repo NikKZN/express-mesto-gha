@@ -1,30 +1,30 @@
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../utils/constants');
+const Error400 = require('../errors/error400');
+const Error404 = require('../errors/error404');
+const Error409 = require('../errors/error409');
+
+const SALT_ROUNDS = 10;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.getUserMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user._id) {
-        return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
+        Error404('Пользователь не найден');
       }
-      return res.send(user);
+      return res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(ERROR_CODE_400).send({ message: `${err.name}: Переданы некорректные данные` });
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -32,73 +32,73 @@ module.exports.createUser = (req, res) => {
     email,
     password,
   } = req.body;
-  User.create({
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  })
+
+  bcrypt.hash(password, SALT_ROUNDS)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({ message: `${err.name}: Переданы некорректные данные` });
+        Error400('Переданы некорректные данные при создании пользователя');
       }
-      return res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
-    });
+      if (err.code === 11000) {
+        Error409();
+      }
+    })
+    .catch(next);
 };
 
-module.exports.getUserId = (req, res) => {
+module.exports.getUserId = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
+        Error404('Пользователь по указанному _id не найден');
       }
       return res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({ message: `Переданы некорректные данные: ${err.name}` });
-      }
-      return res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
-    });
+    .catch(next);
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
+        Error404('Пользователь с указанным _id не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({ message: `Переданы некорректные данные: ${err.name}` });
+        Error400('Переданы некорректные данные при обновлении профиля');
       }
-      return res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
-    });
+    })
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_CODE_404).send({ message: 'Пользователь не найден' });
+        Error404('Пользователь с указанным _id не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({ message: `Переданы некорректные данные: ${err.name}` });
+        Error400('Переданы некорректные данные при обновлении аватара');
       }
-      return res.status(ERROR_CODE_500).send({ message: `Ошибка по-умолчанию: ${err}` });
-    });
+    })
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -108,11 +108,7 @@ module.exports.login = (req, res) => {
         'some-secret-key',
         { expiresIn: '7d' },
       );
-      res.send({ token });
+      res.cookie('jwt', token, { httpOnly: true }).send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
