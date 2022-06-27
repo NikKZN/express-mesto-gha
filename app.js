@@ -24,10 +24,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/signin', signinValidation, login);
 app.post('/signup', signupValidation, createUser);
 
-app.use(auth);
-
 app.use('/cards', cardsRoutes);
 app.use('/users', usersRoutes);
+app.use(auth);
 app.use('*', () => {
   Error404('Страница не найдена!');
 });

@@ -9,7 +9,9 @@ const {
 } = require('../controllers/cards');
 
 const { createCardValidation, cardIdValidation } = require('../middlewares/validation');
+const auth = require('../middlewares/auth');
 
+router.use(auth);
 router.get('/', getCards);
 router.post('/', createCardValidation, createCard);
 router.delete('/:cardId', cardIdValidation, deleteCard);
