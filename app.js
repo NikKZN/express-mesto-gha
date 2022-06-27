@@ -8,6 +8,7 @@ const usersRoutes = require('./routes/users');
 const auth = require('./middlewares/auth');
 const errHandler = require('./middlewares/errHandler');
 const { signupValidation, signinValidation } = require('./middlewares/validation');
+const Error404 = require('./errors/error404');
 
 const { PORT = 3000 } = process.env;
 
@@ -27,8 +28,8 @@ app.use(auth);
 
 app.use('/cards', cardsRoutes);
 app.use('/users', usersRoutes);
-app.use('/', (req, res) => {
-  res.status(404).send({ message: 'Страница не найдена!' });
+app.use('*', () => {
+  Error404('Страница не найдена!');
 });
 
 app.use(errors());
