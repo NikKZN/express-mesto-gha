@@ -44,9 +44,10 @@ module.exports.likeCard = (req, res, next) => Card
   )
   .then((card) => {
     if (!card) {
-      Error404('Передан несуществующий _id карточки');
+      // Error404('Передан несуществующий _id карточки');
+      res.status(404).send({ message: 'Передан несуществующий _id карточки' });
     }
-    return res.send({ data: card });
+    res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
