@@ -19,7 +19,13 @@ module.exports.getUserMe = (req, res, next) => {
       if (!user._id) {
         Error404('Пользователь не найден');
       }
-      return res.send({ data: user });
+      return res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+        _id: user._id,
+      });
     })
     .catch(next);
 };
