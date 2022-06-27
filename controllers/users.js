@@ -41,7 +41,15 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.send({ data: user }))
+    .then((newUser) => {
+      res.send({
+        name: newUser.name,
+        about: newUser.about,
+        avatar: newUser.avatar,
+        email: newUser.email,
+        _id: newUser._id,
+      });
+    })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         Error400('Переданы некорректные данные при создании пользователя');
