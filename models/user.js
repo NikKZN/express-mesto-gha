@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { isEmail, isURL } = require('validator');
-const Error401 = require('../errors/error401');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,8 +21,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator: (v) => isURL(v, { required_protocol: true }),
-      message: 'Неверный формат URL',
+      validator: (v) => isURL(v),
+      message: 'Неверный формат ссылки!',
     },
   },
   email: {
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (v) => isEmail(v),
-      message: 'Неверный формат почты',
+      message: 'Неверный формат почты!',
     },
   },
   password: {
@@ -45,13 +45,13 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        Error401('Указан неверный логин или пароль');
+        return (new UnauthorizedError('Указан неверный логин или пароль!'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            Error401('Указан неверный логин или пароль');
+            return (new UnauthorizedError('Указан неверный логин или пароль!'));
           }
 
           return user;

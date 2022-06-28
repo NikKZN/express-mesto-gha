@@ -19,7 +19,7 @@ const signinValidation = celebrate({
   }),
 });
 
-const getUserIdValidation = celebrate({
+const getUserByIdValidation = celebrate({
   params: Joi.object().keys({
     userId: Joi.string().required().length(24).hex(),
   }),
@@ -27,14 +27,14 @@ const getUserIdValidation = celebrate({
 
 const updateProfileValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
   }),
 });
 
 const updateAvatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(regex),
+    avatar: Joi.string().required().pattern(regex),
   }),
 });
 
@@ -54,7 +54,7 @@ const cardIdValidation = celebrate({
 module.exports = {
   signupValidation,
   signinValidation,
-  getUserIdValidation,
+  getUserByIdValidation,
   updateProfileValidation,
   updateAvatarValidation,
   createCardValidation,

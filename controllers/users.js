@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const Error400 = require('../errors/error400');
-const Error404 = require('../errors/error404');
-const Error409 = require('../errors/error409');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const ConflictError = require('../errors/ConflictError');
 
 const SALT_ROUNDS = 10;
 
@@ -17,15 +17,9 @@ module.exports.getUserMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user._id) {
-        Error404('Пользователь не найден');
+        return next(new NotFoundError('Пользователь не найден!'));
       }
-      return res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-        _id: user._id,
-      });
+      return res.send({ data: user });
     })
     .catch(next);
 };
@@ -48,7 +42,7 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     }))
     .then((newUser) => {
-      res.send({
+      res.status(201).send({
         name: newUser.name,
         about: newUser.about,
         avatar: newUser.avatar,
@@ -57,21 +51,22 @@ module.exports.createUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        Error400('Переданы некорректные данные при создании пользователя');
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя!'));
       }
       if (err.code === 11000) {
-        Error409();
+        next(new ConflictError('Данный Email уже зарегистрирован!'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
-module.exports.getUserId = (req, res, next) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        Error404('Пользователь по указанному _id не найден');
+        return next(new NotFoundError('Пользователь по указанному _id не найден!'));
       }
       return res.send({ data: user });
     })
@@ -83,33 +78,42 @@ module.exports.updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        Error404('Пользователь с указанным _id не найден');
+        return next(new NotFoundError('Пользователь с указанным _id не найден!'));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        Error400('Переданы некорректные данные при обновлении профиля');
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля!'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .then((user) => {
       if (!user) {
-        Error404('Пользователь с указанным _id не найден');
+        return next(new NotFoundError('Пользователь с указанным _id не найден!'));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        Error400('Переданы некорректные данные при обновлении аватара');
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара!'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -122,7 +126,7 @@ module.exports.login = (req, res, next) => {
         'some-secret-key',
         { expiresIn: '7d' },
       );
-      res.cookie('jwt', token, { httpOnly: true }).send({ token });
+      res.send({ token });
     })
     .catch(next);
 };
