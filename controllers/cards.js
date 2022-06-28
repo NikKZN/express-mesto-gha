@@ -23,15 +23,28 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        Error404('Карточка с указанным id не найдена');
+        Error404();
       }
       if (card.owner.toString() !== req.user._id) {
         Error403();
       }
-      return res.send({ message: 'Удаление прошло успешно' });
+      Card.findByIdAndRemove(req.params.cardId)
+        .then(() => res.send({ message: 'Удаление прошло успешно' }))
+        .catch(next);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        Error400('Переданы некорректные данные для удаления карточки');
+      }
+      if (err.statusCode === 404) {
+        Error404('Передан несуществующий _id карточки');
+      }
+      if (err.statusCode === 403) {
+        Error403();
+      }
     })
     .catch(next);
 };
