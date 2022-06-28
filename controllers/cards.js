@@ -44,14 +44,16 @@ module.exports.likeCard = (req, res, next) => Card
   )
   .then((card) => {
     if (!card) {
-      // Error404('Передан несуществующий _id карточки');
-      res.status(404).send({ message: 'Передан несуществующий _id карточки' });
+      Error404();
     }
     res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       Error400('Переданы некорректные данные для постановки лайка');
+    }
+    if (err.statusCode === 404) {
+      Error404('Передан несуществующий _id карточки');
     }
   })
   .catch(next);
@@ -64,13 +66,16 @@ module.exports.dislikeCard = (req, res, next) => Card
   )
   .then((card) => {
     if (!card) {
-      Error404('Передан несуществующий _id карточки');
+      Error404();
     }
     return res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       Error400('Переданы некорректные данные для снятия лайка');
+    }
+    if (err.statusCode === 404) {
+      Error404('Передан несуществующий _id карточки');
     }
   })
   .catch(next);
