@@ -27,10 +27,10 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карточка с указанным _id не найдена!'));
+        throw new NotFoundError('Карточка с указанным _id не найдена!');
       }
       if (card.owner.toString() !== req.user._id) {
-        next(new ForbiddenError('Нельзя удалить карточку, созданную не вами!'));
+        throw new ForbiddenError('Нельзя удалить карточку, созданную не вами!');
       }
       return card.remove();
     })
@@ -52,7 +52,7 @@ module.exports.likeCard = (req, res, next) => Card
   )
   .then((card) => {
     if (!card) {
-      return next(new NotFoundError('Передан несуществующий _id карточки!'));
+      throw new NotFoundError('Передан несуществующий _id карточки!');
     }
     return res.send({ data: card });
   })
@@ -72,7 +72,7 @@ module.exports.dislikeCard = (req, res, next) => Card
   )
   .then((card) => {
     if (!card) {
-      return next(new NotFoundError('Передан несуществующий _id карточки!'));
+      throw new NotFoundError('Передан несуществующий _id карточки!');
     }
     return res.send({ data: card });
   })

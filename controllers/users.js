@@ -17,7 +17,7 @@ module.exports.getUserMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user._id) {
-        return next(new NotFoundError('Пользователь не найден!'));
+        throw new NotFoundError('Пользователь не найден!');
       }
       return res.send({ data: user });
     })
@@ -53,8 +53,7 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя!'));
-      }
-      if (err.code === 11000) {
+      } else if (err.code === 11000) {
         next(new ConflictError('Данный Email уже зарегистрирован!'));
       } else {
         next(err);
@@ -66,7 +65,7 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return next(new NotFoundError('Пользователь по указанному _id не найден!'));
+        throw new NotFoundError('Пользователь по указанному _id не найден!');
       }
       return res.send({ data: user });
     })
@@ -78,7 +77,7 @@ module.exports.updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return next(new NotFoundError('Пользователь с указанным _id не найден!'));
+        throw new NotFoundError('Пользователь с указанным _id не найден!');
       }
       return res.send({ data: user });
     })
@@ -103,7 +102,7 @@ module.exports.updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        return next(new NotFoundError('Пользователь с указанным _id не найден!'));
+        throw new NotFoundError('Пользователь с указанным _id не найден!');
       }
       return res.send({ data: user });
     })
